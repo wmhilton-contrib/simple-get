@@ -46,6 +46,7 @@ function simpleGet (opts, cb) {
   const req = protocol.request(opts, res => {
     if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
       opts.url = res.headers.location // Follow 3xx redirects
+      ;(opts.redirects) ? opts.redirects.push(opts.url) : opts.redirects = [opts.url]
       delete opts.headers.host // Discard `host` header on redirect (see #32)
       res.resume() // Discard response
 
@@ -70,6 +71,7 @@ function simpleGet (opts, cb) {
   if (isStream(body)) body.on('error', cb).pipe(req)
   else req.end(body)
 
+  req.redirects = opts.redirects
   return req
 }
 
